@@ -87,42 +87,44 @@ function extractEntities(json, { camelizeKeys, camelizeTypeValues }) {
 
   wrap(json).forEach((elem) => {
     const type = camelizeKeys ? camelCase(elem.type) : elem.type;
-
-    ret[type] = ret[type] || {};
-    ret[type][elem.id] = ret[type][elem.id] || {
+    let element = {
       id: elem.id,
     };
-    ret[type][elem.id].type = camelizeTypeValues ? camelCase(elem.type) : elem.type;
+
+    ret[type] = ret[type] || [];
+    element.type = camelizeTypeValues ? camelCase(elem.type) : elem.type;
 
     if (camelizeKeys) {
-      ret[type][elem.id].attributes = {};
+      element.attributes = {};
 
       keys(elem.attributes).forEach((key) => {
-        ret[type][elem.id].attributes[camelCase(key)] = camelizeNestedKeys(elem.attributes[key]);
+        element.attributes[camelCase(key)] = camelizeNestedKeys(elem.attributes[key]);
       });
     } else {
-      ret[type][elem.id].attributes = elem.attributes;
+      element.attributes = elem.attributes;
     }
 
     if (elem.links) {
-      ret[type][elem.id].links = {};
+      element.links = {};
 
       keys(elem.links).forEach((key) => {
         const newKey = camelizeKeys ? camelCase(key) : key;
-        ret[type][elem.id].links[newKey] = elem.links[key];
+        element.links[newKey] = elem.links[key];
       });
     }
 
     if (elem.relationships) {
-      ret[type][elem.id].relationships = extractRelationships(elem.relationships, {
+      element.relationships = extractRelationships(elem.relationships, {
         camelizeKeys,
         camelizeTypeValues,
       });
     }
 
     if (elem.meta) {
-      ret[type][elem.id].meta = processMeta(elem.meta, { camelizeKeys });
+      element.meta = processMeta(elem.meta, { camelizeKeys });
     }
+
+    ret[type].push(element);
   });
 
   return ret;

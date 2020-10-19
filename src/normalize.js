@@ -213,6 +213,9 @@ export default function normalize(json, {
       filterEndpoint,
     }));
   }
+  else if(json.meta) {
+    ret.meta = processMeta(json.meta, { camelizeKeys });
+  }
 
   return ret;
 }
